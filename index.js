@@ -19,10 +19,10 @@ const getWinner = (tmp) => {
 const groupStage = (groups, first, second, third, fourth) => {
   for (let i = 0; i < 8; i++) {
     console.log("Group " + groups[i].group + '\n')
-    
+
     let tmp = groups[i].groupInfo[first].team.ranking - groups[i].groupInfo[second].team.ranking
     let won = getWinner(tmp)
-    let goals = (won != 0) ? Math.floor(Math.random() * 9) + 1 : Math.floor(Math.random() * 5) * 2
+    let goals = (won !== 0) ? Math.floor(Math.random() * 9) + 1 : Math.floor(Math.random() * 5) * 2
 
     let game =
     {
@@ -33,7 +33,7 @@ const groupStage = (groups, first, second, third, fourth) => {
       goalsAway: undefined
     }
 
-    if (won == -1) {
+    if (won === -1) {
       let g1 = Math.floor(Math.random() * goals);
       let g2 = goals - g1;
       game.goalsHome = (g1 > g2) ? g1 : g2;
@@ -51,7 +51,7 @@ const groupStage = (groups, first, second, third, fourth) => {
       groups[i].groupInfo[second].gf += game.goalsAway
 
     }
-    else if (won == 1) {
+    else if (won === 1) {
       let g1 = Math.floor(Math.random() * goals);
       let g2 = goals - g1;
       game.goalsHome = (g1 < g2) ? g1 : g2;
@@ -84,6 +84,7 @@ const groupStage = (groups, first, second, third, fourth) => {
       groups[i].groupInfo[first].gf += game.goalsAway
       groups[i].groupInfo[first].pts += 1;
     }
+
     groupMatches.push(game)
     console.log(groups[i].groupInfo[first].team.name + " " + game.goalsHome + " : " + game.goalsAway + " " + groups[i].groupInfo[second].team.name)
 
@@ -99,7 +100,8 @@ const groupStage = (groups, first, second, third, fourth) => {
       goalsHome: undefined,
       goalsAway: undefined
     }
-    if (won == -1) {
+
+    if (won === -1) {
       let g1 = Math.floor(Math.random() * goals);
       let g2 = goals - g1;
       game.goalsHome = (g1 > g2) ? g1 : g2;
@@ -117,7 +119,7 @@ const groupStage = (groups, first, second, third, fourth) => {
       groups[i].groupInfo[fourth].gf += game.goalsAway
 
     }
-    else if (won == 1) {
+    else if (won === 1) {
       let g1 = Math.floor(Math.random() * goals);
       let g2 = goals - g1;
       game.goalsHome = (g1 < g2) ? g1 : g2;
@@ -152,6 +154,23 @@ const groupStage = (groups, first, second, third, fourth) => {
     }
     groupMatches.push(game)
     console.log(groups[i].groupInfo[third].team.name + " " + game.goalsHome + " : " + game.goalsAway + " " + groups[i].groupInfo[fourth].team.name + '\n')
+  }
+}
+
+const endOfGroupStage = (groups) => {
+  for (let i = 0; i < 8; i++) {
+    console.log("Group " + groups[i].group + '\n')
+    for (let j = 1; j <= 4; j++) {
+      console.log(j + ". " + groups[i].groupInfo[j - 1].team.name + "("
+        + groups[i].groupInfo[j - 1].team.ranking + ")   "
+        + groups[i].groupInfo[j - 1].w + "   "
+        + groups[i].groupInfo[j - 1].d + "   "
+        + groups[i].groupInfo[j - 1].l + "   "
+        + groups[i].groupInfo[j - 1].gf + ":" + groups[i].groupInfo[j - 1].ga + "   "
+        + groups[i].groupInfo[j - 1].pts
+      )
+    }
+    console.log()
   }
 }
 
@@ -224,12 +243,27 @@ const main = () => {
     },
   ]
 
-  console.log("Group stage: Matchday 1 of 3"+ '\n')
+  console.log("Group stage: Matchday 1 of 3" + '\n')
   groupStage(groups, 0, 1, 2, 3);
-  console.log("Group stage: Matchday 2 of 3")
-  //groupStage(groups);
-  console.log("Group stage: Matchday 3 of 3")
-  //groupStage(groups);
+
+  console.log("------------------------------------")
+  console.log("Group stage: Matchday 2 of 3" + '\n')
+  groupStage(groups, 0, 2, 1, 3);
+
+  console.log("------------------------------------")
+  console.log("Group stage: Matchday 3 of 3" + '\n')
+  groupStage(groups, 0, 3, 1, 2);
+
+  console.log("------------------------------------")
+  console.log("End of the group stages")
+
+  for(let i = 0; i< groups.length; i++) {
+    groups[i].groupInfo.sort((a,b) => {
+      return -1;
+    })
+  }
+
+  endOfGroupStage(groups)
 };
 
 main();
