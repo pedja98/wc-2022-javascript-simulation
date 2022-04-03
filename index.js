@@ -20,25 +20,29 @@ const getWinner = (tmp) => {
 const getResult = (team1, team2, maxGoalsScored) => {
   let tmp = team1.ranking - team2.ranking
   let won = getWinner(tmp)
-  let goals = (won !== 0) ? Math.floor(Math.random() * (maxGoalsScored - 1)) | 1 : Math.floor(Math.random() * maxGoalsScored / 2) * 2
+  let goals = (won !== 0) ? Math.floor(Math.random() * (maxGoalsScored - 1) + 1) : Math.floor(Math.random() * maxGoalsScored / 2) * 2
 
-  let game =
-  {
+  let game = {
     homeTeam: team1.name,
     awayTeam: team2.name,
     result: won,
     goalsHome: undefined,
-    goalsAway: undefined
+    goalsAway: undefined,
   }
-
   if (won === -1) {
     let g1 = Math.floor(Math.random() * goals);
+    if (g1 === goals / 2) {
+      g1++;
+    }
     let g2 = goals - g1;
     game.goalsHome = (g1 > g2) ? g1 : g2;
     game.goalsAway = (g1 < g2) ? g1 : g2;
   }
   else if (won === 1) {
     let g1 = Math.floor(Math.random() * goals);
+    if (g1 === goals / 2) {
+      g1++;
+    }
     let g2 = goals - g1;
     game.goalsHome = (g1 < g2) ? g1 : g2;
     game.goalsAway = (g1 > g2) ? g1 : g2;
@@ -48,11 +52,15 @@ const getResult = (team1, team2, maxGoalsScored) => {
     game.goalsAway = goals / 2;
   }
 
+  if (maxGoalsScored === 10) {
+    game.firstHalfGoalsHome = Math.floor(Math.random() * (game.goalsHome + 1))
+    game.firstHalfGoalsAway = Math.floor(Math.random() * (game.goalsAway + 1))
+  }
+
   return game;
 }
 
 const playGameGroupStage = (group, first, second) => {
-
   let game = getResult(group.groupInfo[first].team, group.groupInfo[second].team, 10)
 
   if (game.result === -1) {
@@ -90,11 +98,13 @@ const playGameGroupStage = (group, first, second) => {
   }
   groupMatches.push(game)
   console.log(group.groupInfo[first].team.name + " " + game.goalsHome + " : " + game.goalsAway + " " + group.groupInfo[second].team.name)
+  console.log("First Half")
+  console.log("{" + group.groupInfo[first].team.name + " " + game.firstHalfGoalsHome + " : " + game.firstHalfGoalsAway + " " + group.groupInfo[second].team.name + "}\n")
 }
 
 const groupStage = (groups, first, second, third, fourth) => {
   for (let i = 0; i < 8; i++) {
-    console.log("Group " + groups[i].group + '\n')
+    console.log("\nGroup " + groups[i].group)
     playGameGroupStage(groups[i], first, second)
     playGameGroupStage(groups[i], third, fourth)
   }
@@ -181,22 +191,22 @@ const endOfGroupStage = (groups) => {
 }
 
 const knockoutStage = () => {
-
   let cnt = 0;
   while (knockoutMatches.length > 1) {
-    if(cnt === 0) {
-      console.log("\nRound of 16");
+    if (cnt === 0) {
+      console.log("****************")
+      console.log("Round of 16");
     }
-    else if(cnt === 1) {
-      console.log("\nQuarter-finals");
+    else if (cnt === 1) {
+      console.log("****************")
+      console.log("Quarter-finals");
     }
     else {
-      console.log("\nSemi-finals");
+      console.log("****************")
+      console.log("Semi-finals");
     }
     cnt++;
-
     let tmpArr = [];
-    
     for (let i = 0; i < knockoutMatches.length; i += 2) {
       console.log("-------------------------------")
       let team1 = playGameKnockoutStage(knockoutMatches[i].homeTeam, knockoutMatches[i].awayTeam);
@@ -209,12 +219,12 @@ const knockoutStage = () => {
       }
       tmpArr.push(tmp)
     }
-
     knockoutMatches = tmpArr
   }
-  console.log("\nFinal")
+  console.log("****************")
+  console.log("Final")
   let winner = playGameKnockoutStage(knockoutMatches[0].homeTeam, knockoutMatches[0].awayTeam);
-  console.log("Winner of wc 2022 is "+winner.name);
+  console.log("\n\nWinner of wc 2022 is " + winner.name + "\n\n");
 
 }
 
@@ -222,10 +232,14 @@ const playGameKnockoutStage = (team1, team2) => {
   let game = getResult(team1, team2, 10)
   if (game.result === -1) {
     console.log(team1.name + " " + game.goalsHome + " : " + game.goalsAway + " " + team2.name)
+    console.log("First Half")
+    console.log("{" + team1.name + " " + game.firstHalfGoalsHome + " : " + game.firstHalfGoalsAway + " " + team2.name + "}\n")
     return team1;
   }
   else if (game.result === 1) {
     console.log(team1.name + " " + game.goalsHome + " : " + game.goalsAway + " " + team2.name)
+    console.log("First Half")
+    console.log("{" + team1.name + " " + game.firstHalfGoalsHome + " : " + game.firstHalfGoalsAway + " " + team2.name + "}\n")
     return team2;
   }
   else {
@@ -233,6 +247,8 @@ const playGameKnockoutStage = (team1, team2) => {
     game.goalsHome += game2.goalsHome
     game.goalsAway += game2.goalsAway
     console.log(team1.name + " " + game.goalsHome + " : " + game.goalsAway + " " + team2.name);
+    console.log("First Half")
+    console.log("{" + team1.name + " " + game.firstHalfGoalsHome + " : " + game.firstHalfGoalsAway + " " + team2.name + "}")
     console.log("Extra time");
     console.log(team1.name + " " + game2.goalsHome + " : " + game2.goalsAway + " " + team2.name);
     if (game2.result === -1) {
@@ -273,10 +289,6 @@ const penalties = (team1, team2) => {
               won = -1;
               break;
             }
-            if (goalsTeam1 - goalsTeam2 === 1 && goalsTeam1 === 5) {
-              won = -1;
-              break;
-            }
           }
           if (goalsTeam2 > goalsTeam1) {
             if (goalsTeam2 - goalsTeam1 === 3) {
@@ -284,10 +296,6 @@ const penalties = (team1, team2) => {
               break;
             }
             if (goalsTeam2 - goalsTeam1 === 2 && goalsTeam2 === 4) {
-              won = 1;
-              break;
-            }
-            if (goalsTeam2 - goalsTeam1 === 1 && goalsTeam2 === 5) {
               won = 1;
               break;
             }
@@ -312,10 +320,20 @@ const penalties = (team1, team2) => {
         }
       }
     }
-    firstRound = false
+    if (firstRound) {
+      firstRound = false
+      if (goalsTeam1 > goalsTeam2) {
+        won = -1;
+        break
+      }
+      if (goalsTeam2 > goalsTeam1) {
+        won = 1
+        break;
+      }
+    }
   }
 
-  console.log(team1.name + " " + goalsTeam1 + " : " + goalsTeam2 + " " + team2.name);
+  console.log(team1.name + " " + goalsTeam1 + " : " + goalsTeam2 + " " + team2.name + '\n');
   return (won == -1) ? team1 : team2;
 }
 
@@ -397,15 +415,15 @@ const main = () => {
     knockoutMatches.push(tmp)
   }
 
-  console.log("Group stage: Matchday 1 of 3" + '\n')
+  console.log("Group stage: Matchday 1 of 3")
   groupStage(groups, 0, 1, 2, 3);
 
   console.log("------------------------------------")
-  console.log("Group stage: Matchday 2 of 3" + '\n')
+  console.log("Group stage: Matchday 2 of 3")
   groupStage(groups, 0, 2, 1, 3);
 
   console.log("------------------------------------")
-  console.log("Group stage: Matchday 3 of 3" + '\n')
+  console.log("Group stage: Matchday 3 of 3")
   groupStage(groups, 0, 3, 1, 2);
 
   console.log("------------------------------------")
